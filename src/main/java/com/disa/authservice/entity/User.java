@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 @Table(name = "users")
 @Getter
 @Setter
-@Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
@@ -43,6 +41,9 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Role> role = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private ConfirmToken confirmToken;
 
     @Override
     public boolean isAccountNonExpired() {
