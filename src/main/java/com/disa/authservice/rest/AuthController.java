@@ -5,15 +5,14 @@ import com.disa.authservice.model.auth.AuthResponse;
 import com.disa.authservice.model.register.RegisterRequest;
 import com.disa.authservice.model.register.RegisterResponse;
 import com.disa.authservice.service.AuthService;
+import com.disa.authservice.service.EmailService;
 import com.disa.authservice.service.RegisterService;
+import com.disa.authservice.service.impl.EmailServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -22,6 +21,8 @@ public class AuthController {
 
     private final RegisterService registerService;
     private final AuthService authService;
+    private final EmailService emailService;
+    private final EmailServiceImpl emailServiceImpl;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
@@ -40,6 +41,18 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @GetMapping("/confirm")
+    public ResponseEntity<String> confirm(@RequestParam("token") String token) {
+
+        boolean isRegistered = registerService.confirmToken(token);
+        if (isRegistered) {
+            return ResponseEntity.ok("Email подтвержден!");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный или истекший токен!");
+        }
+
     }
 
 

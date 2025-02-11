@@ -28,12 +28,9 @@ public class ConfirmToken {
     )
     private User user;
 
-    @Column(nullable = false)
     private LocalDateTime createdTime;
 
-    @Column(nullable = false)
     private LocalDateTime expiredTime;
 
-    @Column(nullable = false)
     private LocalDateTime confirmedTime;
 }

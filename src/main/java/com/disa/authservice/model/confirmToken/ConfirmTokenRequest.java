@@ -11,9 +11,7 @@ import lombok.Setter;
 @Setter
 public class ConfirmTokenRequest {
 
-    private String token;
-    private Long userId;
-    private String createdTime;
-    private String expiredTime;
-    private String confirmedTime;
+    private String email;
+
+    private String verificationCode;
 }

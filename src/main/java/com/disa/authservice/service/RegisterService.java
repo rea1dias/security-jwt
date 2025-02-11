@@ -7,6 +7,7 @@ import com.disa.authservice.model.register.RegisterResponse;
 public interface RegisterService {
 
     RegisterResponse register(RegisterRequest request);
-    void createConfirmToken(User user);
+    String createConfirmToken(User user);
+    boolean confirmToken(String token);
 
 }

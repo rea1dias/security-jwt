@@ -9,7 +9,9 @@ import com.disa.authservice.model.register.RegisterRequest;
 import com.disa.authservice.model.register.RegisterResponse;
 import com.disa.authservice.repo.ConfirmTokenRepository;
 import com.disa.authservice.repo.UserRepository;
+import com.disa.authservice.service.EmailService;
 import com.disa.authservice.service.RegisterService;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -28,6 +31,7 @@ public class RegisterServiceImpl implements RegisterService {
     private final PasswordEncoder encoder;
     private final RegisterMapper mapper;
     private final ConfirmTokenRepository confirmTokenRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -42,15 +46,29 @@ public class RegisterServiceImpl implements RegisterService {
         user.setRole(List.of(Role.USER));
         User saved = repository.save(user);
 
-        createConfirmToken(saved);
+        String token = createConfirmToken(saved);
+        sendConfirmationEmail(saved, token);
 
-        // TODO: Send confirm token
         return mapper.toResponse(saved);
+    }
+
+    private void sendConfirmationEmail(User user, String token) {
+        String subject = "Подтвердите ваш email";
+        String confirmationLink = "http://localhost:8080/auth/confirm?token=" + token;
+        String text = "<h3>Добро пожаловать, " + user.getFirstName() + "!</h3>"
+                + "<p>Для завершения регистрации, подтвердите вашу почту, нажав на ссылку ниже:</p>"
+                + "<a href=\"" + confirmationLink + "\">Подтвердить Email</a>";
+
+        try {
+            emailService.sendEmail(user.getEmail(), subject, text);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     @Override
-    public void createConfirmToken(User user) {
+    public String createConfirmToken(User user) {
         String token = UUID.randomUUID().toString();
         ConfirmToken confirmToken = ConfirmToken.builder()
                 .token(token)
@@ -60,5 +78,29 @@ public class RegisterServiceImpl implements RegisterService {
                 .confirmedTime(LocalDateTime.now())
                 .build();
         confirmTokenRepository.save(confirmToken);
+        return token;
+    }
+
+    @Override
+    public boolean confirmToken(String token) {
+
+        Optional<ConfirmToken> optionalToken = confirmTokenRepository.findByToken(token);
+
+        if (optionalToken.isEmpty()) {
+            return false;
+        }
+
+        ConfirmToken confirmToken = optionalToken.get();
+
+        if (confirmToken.getExpiredTime().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        User user = confirmToken.getUser();
+        user.setEnabled(true);
+        repository.save(user);
+
+        confirmTokenRepository.delete(confirmToken);
+        return true;
     }
 }

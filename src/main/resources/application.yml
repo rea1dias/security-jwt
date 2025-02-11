@@ -16,6 +16,18 @@ spring:
         format_sql: true
     show-sql: true
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: rahmanovdias13@gmail.com
+    password: kgho obbs frog oqsj
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   secret: c2e5934d12d8a87d9bf2f68d239d3e7f93b82fdb5e7b20f5ff15d8c01d72ab37
   lifetime: 1h
