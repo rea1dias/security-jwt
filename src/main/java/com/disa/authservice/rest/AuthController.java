@@ -4,8 +4,10 @@ import com.disa.authservice.model.auth.AuthRequest;
 import com.disa.authservice.model.auth.AuthResponse;
 import com.disa.authservice.model.register.RegisterRequest;
 import com.disa.authservice.model.register.RegisterResponse;
+import com.disa.authservice.model.reset.ResetTokenRequest;
 import com.disa.authservice.service.AuthService;
 import com.disa.authservice.service.EmailService;
+import com.disa.authservice.service.PasswordService;
 import com.disa.authservice.service.RegisterService;
 import com.disa.authservice.service.impl.EmailServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +23,7 @@ public class AuthController {
 
     private final RegisterService registerService;
     private final AuthService authService;
-    private final EmailService emailService;
-    private final EmailServiceImpl emailServiceImpl;
+    private final PasswordService passwordService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
@@ -52,7 +53,27 @@ public class AuthController {
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный или истекший токен!");
         }
+    }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgot(@RequestParam("email") String email) {
+        try {
+            passwordService.requestPasswordReset(email);
+            return ResponseEntity.ok("Password reset link has been sent to your email.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> reset(@RequestBody ResetTokenRequest request) {
+        try {
+            passwordService.resetPassword(request);
+            return ResponseEntity.ok("Password has been successfully reset.");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
 

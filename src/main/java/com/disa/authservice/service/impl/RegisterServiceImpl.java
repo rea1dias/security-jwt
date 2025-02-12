@@ -103,4 +103,10 @@ public class RegisterServiceImpl implements RegisterService {
         confirmTokenRepository.delete(confirmToken);
         return true;
     }
+
+    @Override
+    public String resetPassword(String email) {
+
+        return "";
+    }
 }

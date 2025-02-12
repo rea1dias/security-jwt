@@ -1,5 +1,6 @@
 package com.disa.authservice.repo;
 
+import com.disa.authservice.entity.ResetToken;
 import com.disa.authservice.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -7,8 +8,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface ResetTokenRepository extends JpaRepository<ResetToken, Long> {
 
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
+    Optional<ResetToken> findByToken(String token);
+    Optional<ResetToken> findByUser(User user);
 }

@@ -9,5 +9,6 @@ public interface RegisterService {
     RegisterResponse register(RegisterRequest request);
     String createConfirmToken(User user);
     boolean confirmToken(String token);
+    String resetPassword(String email);
 
 }
