@@ -5,16 +5,19 @@ import com.disa.authservice.entity.User;
 import com.disa.authservice.enums.Role;
 import com.disa.authservice.exception.UserAlreadyExistsException;
 import com.disa.authservice.mapper.RegisterMapper;
+import com.disa.authservice.model.confirmToken.ConfirmTokenRequest;
 import com.disa.authservice.model.register.RegisterRequest;
 import com.disa.authservice.model.register.RegisterResponse;
 import com.disa.authservice.repo.ConfirmTokenRepository;
 import com.disa.authservice.repo.UserRepository;
 import com.disa.authservice.service.EmailService;
 import com.disa.authservice.service.RegisterService;
+import com.disa.authservice.service.TwoFactorAuthService;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +35,7 @@ public class RegisterServiceImpl implements RegisterService {
     private final RegisterMapper mapper;
     private final ConfirmTokenRepository confirmTokenRepository;
     private final EmailService emailService;
+    private final TwoFactorAuthService twoFactorAuthService;
 
     @Override
     @Transactional
@@ -43,6 +47,8 @@ public class RegisterServiceImpl implements RegisterService {
         val user = mapper.toEntity(request);
         user.setPassword(encoder.encode(request.getPassword()));
         user.setEnabled(false);
+        user.setTwoFactorSecret(twoFactorAuthService.generateSecretKey());
+        user.setTwoFactorEnabled(false);
         user.setRole(List.of(Role.USER));
         User saved = repository.save(user);
 
@@ -66,7 +72,6 @@ public class RegisterServiceImpl implements RegisterService {
         }
     }
 
-
     @Override
     public String createConfirmToken(User user) {
         String token = UUID.randomUUID().toString();
@@ -82,9 +87,9 @@ public class RegisterServiceImpl implements RegisterService {
     }
 
     @Override
-    public boolean confirmToken(String token) {
+    public boolean confirmToken(ConfirmTokenRequest request) {
 
-        Optional<ConfirmToken> optionalToken = confirmTokenRepository.findByToken(token);
+        Optional<ConfirmToken> optionalToken = confirmTokenRepository.findByToken(request.getToken());
 
         if (optionalToken.isEmpty()) {
             return false;

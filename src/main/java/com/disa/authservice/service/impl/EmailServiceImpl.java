@@ -25,7 +25,6 @@ public class EmailServiceImpl implements EmailService {
         helper.setText(body, true);
         helper.setFrom("rahmanovdias13@gmail.com");
 
-
         sender.send(message);
 
     }

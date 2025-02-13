@@ -2,6 +2,7 @@ package com.disa.authservice.service.impl;
 
 import com.disa.authservice.entity.ResetToken;
 import com.disa.authservice.entity.User;
+import com.disa.authservice.model.reset.ResetPasswordRequest;
 import com.disa.authservice.model.reset.ResetTokenRequest;
 import com.disa.authservice.repo.ResetTokenRepository;
 import com.disa.authservice.repo.UserRepository;
@@ -26,9 +27,9 @@ public class PasswordServiceImpl implements PasswordService {
     private final PasswordEncoder encoder;
 
     @Override
-    public void requestPasswordReset(String email) {
+    public void requestPasswordReset(ResetPasswordRequest request) {
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         String tokenReset = UUID.randomUUID().toString();

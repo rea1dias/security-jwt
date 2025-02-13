@@ -38,6 +38,10 @@ public class User implements UserDetails {
 
     private boolean isEnabled;
 
+    private String twoFactorSecret;
+
+    private boolean twoFactorEnabled;
+
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
     private List<Role> role = new ArrayList<>();

@@ -2,16 +2,21 @@ package com.disa.authservice.rest;
 
 import com.disa.authservice.model.auth.AuthRequest;
 import com.disa.authservice.model.auth.AuthResponse;
+import com.disa.authservice.model.confirmToken.ConfirmTokenRequest;
 import com.disa.authservice.model.register.RegisterRequest;
 import com.disa.authservice.model.register.RegisterResponse;
+import com.disa.authservice.model.reset.ResetPasswordRequest;
 import com.disa.authservice.model.reset.ResetTokenRequest;
+import com.disa.authservice.model.twofa.TwofaRequest;
+import com.disa.authservice.model.twofa.ValidateTwofaRequest;
 import com.disa.authservice.service.AuthService;
-import com.disa.authservice.service.EmailService;
 import com.disa.authservice.service.PasswordService;
 import com.disa.authservice.service.RegisterService;
-import com.disa.authservice.service.impl.EmailServiceImpl;
+import com.disa.authservice.service.impl.TwoFactorAuthServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +29,7 @@ public class AuthController {
     private final RegisterService registerService;
     private final AuthService authService;
     private final PasswordService passwordService;
+    private final TwoFactorAuthServiceImpl twoFactorAuthService;
 
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
@@ -45,9 +51,9 @@ public class AuthController {
     }
 
     @GetMapping("/confirm")
-    public ResponseEntity<String> confirm(@RequestParam("token") String token) {
+    public ResponseEntity<String> confirm(@RequestBody ConfirmTokenRequest request) {
 
-        boolean isRegistered = registerService.confirmToken(token);
+        boolean isRegistered = registerService.confirmToken(request);
         if (isRegistered) {
             return ResponseEntity.ok("Email подтвержден!");
         } else {
@@ -56,9 +62,9 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgot(@RequestParam("email") String email) {
+    public ResponseEntity<String> forgot(@RequestBody ResetPasswordRequest request) {
         try {
-            passwordService.requestPasswordReset(email);
+            passwordService.requestPasswordReset(request);
             return ResponseEntity.ok("Password reset link has been sent to your email.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -76,7 +82,34 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/enable")
+    public ResponseEntity<byte[]> enable2fa(@RequestBody TwofaRequest request) {
+        try {
+            byte[] qrCode = twoFactorAuthService.enableTwofaAuth(request);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_PNG_VALUE)
+                    .body(qrCode);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+                    .body(("Failed to enable 2FA: " + e.getMessage()).getBytes());
+        }
+    }
 
+    @PostMapping("/validate")
+    public ResponseEntity<String> validate2fa(@RequestBody ValidateTwofaRequest request) {
+        try {
+            boolean isValid = twoFactorAuthService.validateTwofaAuth(request);
+            if (isValid) {
+                return ResponseEntity.ok("2FA code is valid.");
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid code");
+        }
+
+    }
 
 
 }
