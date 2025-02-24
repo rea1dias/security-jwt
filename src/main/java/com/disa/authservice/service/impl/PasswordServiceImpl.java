@@ -57,7 +57,6 @@ public class PasswordServiceImpl implements PasswordService {
 
     @Override
     public void resetPassword(ResetTokenRequest request) {
-
         ResetToken resetToken = repository.findByToken(request.getToken())
                 .orElseThrow(() -> new UsernameNotFoundException("Token not found"));
 

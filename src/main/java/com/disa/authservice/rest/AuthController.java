@@ -55,7 +55,7 @@ public class AuthController {
 
         boolean isRegistered = registerService.confirmToken(request);
         if (isRegistered) {
-            return ResponseEntity.ok("Email подтвержден!");
+            return ResponseEntity.ok("Email подтверж    ден!");
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Неверный или истекший токен!");
         }
@@ -76,7 +76,6 @@ public class AuthController {
         try {
             passwordService.resetPassword(request);
             return ResponseEntity.ok("Password has been successfully reset.");
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -99,12 +98,10 @@ public class AuthController {
     @PostMapping("/validate")
     public ResponseEntity<String> validate2fa(@RequestBody ValidateTwofaRequest request) {
         try {
-            boolean isValid = twoFactorAuthService.validateTwofaAuth(request);
-            if (isValid) {
+            if (twoFactorAuthService.validateTwofaAuth(request)) {
                 return ResponseEntity.ok("2FA code is valid.");
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code.");
             }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid 2FA code.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid code");
         }

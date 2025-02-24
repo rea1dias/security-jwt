@@ -9,8 +9,6 @@ public interface TwoFactorAuthService {
 
     boolean validateTwofaAuth(ValidateTwofaRequest request);
 
-    boolean validateCode(String secretKey, int code);
-
     String generateSecretKey();
 
     void save2faSecret(String email, String secretKey);

@@ -29,8 +29,6 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
             String secretKey = generateSecretKey();
             save2faSecret(request.getEmail(), secretKey);
             String qrCodeUrl = generateQRCodeUrl(secretKey, request.getEmail(), "E-learn");
-
-
             return generateQRCodeImage(qrCodeUrl);
         } catch (WriterException e) {
             throw new RuntimeException("Failed to generate QR Code", e);
@@ -41,11 +39,6 @@ public class TwoFactorAuthServiceImpl implements TwoFactorAuthService {
     public boolean validateTwofaAuth(ValidateTwofaRequest request) {
         String secretKey = getTwoFactorSecret(request.getEmail());
         return googleAuthenticator.authorize(secretKey, request.getCode());
-    }
-
-    @Override
-    public boolean validateCode(String secretKey, int code) {
-        return googleAuthenticator.authorize(secretKey, code);
     }
 
     /**
