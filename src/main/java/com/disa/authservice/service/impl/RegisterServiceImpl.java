@@ -11,13 +11,13 @@ import com.disa.authservice.model.register.RegisterResponse;
 import com.disa.authservice.repo.ConfirmTokenRepository;
 import com.disa.authservice.repo.UserRepository;
 import com.disa.authservice.service.EmailService;
+import com.disa.authservice.service.ProfileService;
 import com.disa.authservice.service.RegisterService;
 import com.disa.authservice.service.TwoFactorAuthService;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +36,7 @@ public class RegisterServiceImpl implements RegisterService {
     private final ConfirmTokenRepository confirmTokenRepository;
     private final EmailService emailService;
     private final TwoFactorAuthService twoFactorAuthService;
+    private final ProfileService profileService;
 
     @Override
     @Transactional

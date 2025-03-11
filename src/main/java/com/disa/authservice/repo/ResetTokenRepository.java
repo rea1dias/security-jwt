@@ -1,7 +1,6 @@
 package com.disa.authservice.repo;
 
 import com.disa.authservice.entity.ResetToken;
-import com.disa.authservice.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,5 +10,4 @@ import java.util.Optional;
 public interface ResetTokenRepository extends JpaRepository<ResetToken, Long> {
 
     Optional<ResetToken> findByToken(String token);
-    Optional<ResetToken> findByUser(User user);
 }
